@@ -1,0 +1,913 @@
+<title>Schlummerzeit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;700;800&display=swap">
+<style>
+/* Layout: one-thumb column. The sky scene answers "wann?": sun by day, sleeping moon while the baby sleeps. One big button logs. */
+:root {
+  --bg: #EDF2FA; --surface: #FFFFFF; --sunken: #E1E8F4; --ink: #232B52; --muted: #5A6385; --line: #D9E0EE;
+  --accent: #4A57A8; --on-accent: #FFFFFF; --nap: #B5740A; --nap-soft: #FBE9B7; --night: #3F4FA3; --night-soft: #DDE1F5;
+  --wake: #F7CF6B; --on-wake: #3A2C05; --butter: #FFE08A; --warn: #A3461A;
+  --display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Nunito", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #10162E; --surface: #1B2342; --sunken: #29325A; --ink: #EDEFFA; --muted: #AAB2D2; --line: #323C66;
+  --accent: #A9B4F5; --on-accent: #141B3A; --nap: #BE8A22; --nap-soft: #4A3A18; --night: #7382DC; --night-soft: #2A3159;
+  --wake: #F2C65F; --on-wake: #3A2C05; --warn: #F0A26B; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #10162E; --surface: #1B2342; --sunken: #29325A; --ink: #EDEFFA; --muted: #AAB2D2; --line: #323C66;
+  --accent: #A9B4F5; --on-accent: #141B3A; --nap: #BE8A22; --nap-soft: #4A3A18; --night: #7382DC; --night-soft: #2A3159;
+  --wake: #F2C65F; --on-wake: #3A2C05; --warn: #F0A26B; color-scheme: dark }
+
+* { box-sizing: border-box }
+html, body { min-height: 100% }
+body { background: var(--bg); color: var(--ink); font: 400 17px/1.45 var(--body); }
+#app { max-width: 480px; margin: 0 auto; padding-block: 16px 104px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 20px }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; line-height: 1.15 }
+h2 { font-size: 20px }
+p { margin: 0 }
+button, input { font: inherit; color: inherit }
+button { cursor: pointer; border: 0; background: none }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px }
+.muted { color: var(--muted) }
+.small { font-size: 15px }
+.num { font-variant-numeric: tabular-nums }
+
+.top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px }
+.top h1 { font-size: 22px }
+
+/* Arc */
+.hero { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px }
+.sky { position: relative; width: 100%; border-radius: 28px; overflow: hidden; color: var(--sky-ink) }
+.sky svg { display: block; width: 100%; height: auto }
+.sky.day { --sky-ink: #232B52; background: linear-gradient(#BFE0F5, #FCE7D6) }
+.sky.nap { --sky-ink: #FFFFFF; background: linear-gradient(#3F4A96, #6A5EAD) }
+.sky.night { --sky-ink: #FFFFFF; background: linear-gradient(#0F1738, #27306B) }
+.sky-track { fill: none; stroke: currentColor; stroke-opacity: .3; stroke-width: 4; stroke-linecap: round; stroke-dasharray: .1 9 }
+.sky-zone { fill: none; stroke: var(--butter); stroke-width: 12; stroke-linecap: round }
+.sky.day .sky-zone { stroke: #F4A95F }
+.sky-fill { fill: none; stroke: currentColor; stroke-width: 5; stroke-linecap: round }
+.cloud { fill: #FFFFFF; opacity: .75; animation: drift 9s ease-in-out infinite alternate }
+.cloud.two { animation-duration: 13s; animation-direction: alternate-reverse }
+.sky.nap .cloud, .sky.night .cloud { opacity: .16 }
+.star { fill: var(--butter); animation: twinkle 4s ease-in-out infinite }
+.star:nth-child(even) { animation-delay: 1.6s }
+.zzz { font: 600 15px var(--display); fill: #FFFFFF; animation: twinkle 3s ease-in-out infinite }
+@keyframes drift { to { transform: translateX(10px) } }
+@keyframes twinkle { 50% { opacity: .35 } }
+.sky-text { position: absolute; inset: auto 0 16px 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0 52px }
+.arc-eyebrow { font-size: 15px; font-weight: 700 }
+.arc-big { font: 600 40px/1.05 var(--display); font-variant-numeric: tabular-nums }
+.arc-sub { font-size: 15px; font-weight: 700; margin-top: 2px }
+
+.main-btn { width: 100%; min-height: 72px; border-radius: 999px; background: var(--accent); color: var(--on-accent); display: flex; align-items: center; justify-content: center; gap: 10px;
+  font: 600 22px/1.1 var(--display); padding: 12px 24px; transition: transform .1s }
+.main-btn svg { width: 26px; height: 26px; flex: none }
+.main-btn:active { transform: scale(.98) }
+.main-btn.wake { background: var(--wake); color: var(--on-wake) }
+.ico { width: 22px; height: 22px; display: block; color: var(--nap) }
+.ico.night { color: var(--night) }
+.ico.plan { opacity: .55 }
+.reason { font-size: 15px; color: var(--muted); max-width: 36em }
+
+.banner { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px }
+.chips { display: flex; flex-wrap: wrap; gap: 8px }
+.chip { min-height: 44px; padding: 8px 14px; border-radius: 12px; background: var(--sunken); font-weight: 700; font-size: 16px }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent) }
+.link { color: var(--accent); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; padding: 6px 0; font-size: 16px; text-align: left }
+
+/* Ribbon */
+.section { display: flex; flex-direction: column; gap: 10px }
+.ribbon { position: relative; height: 40px; background: var(--sunken); border-radius: 10px; overflow: hidden }
+.seg { position: absolute; top: 0; bottom: 0; border-radius: 6px; min-width: 4px; padding: 0 }
+.seg.nap { background: var(--nap) }
+.seg.night { background: var(--night) }
+.seg.plan { background: repeating-linear-gradient(135deg, var(--nap) 0 3px, transparent 3px 7px); box-shadow: inset 0 0 0 2px var(--nap) }
+.seg.plan.night { background: repeating-linear-gradient(135deg, var(--night) 0 3px, transparent 3px 7px); box-shadow: inset 0 0 0 2px var(--night) }
+.nowline { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink) }
+.ticks { position: relative; height: 18px; font-size: 13px; color: var(--muted) }
+.ticks span { position: absolute; transform: translateX(-50%); font-variant-numeric: tabular-nums }
+.ticks span:first-child { transform: none }
+.ticks span:last-child { transform: translateX(-100%) }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; color: var(--muted) }
+.legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 6px; vertical-align: -2px }
+
+/* Rows */
+.rows { background: var(--surface); border-radius: 16px; border: 1px solid var(--line); overflow: hidden }
+.row { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 12px 14px; text-align: left; min-height: 56px; border-top: 1px solid var(--line) }
+.row:first-child { border-top: 0 }
+.row b { font-weight: 700 }
+.row .t { font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right }
+
+/* History */
+.learn { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px }
+.stars { display: flex; gap: 4px; color: var(--sunken) }
+.stars svg { width: 30px; height: 30px; flex: 0 1 30px; min-width: 0 }
+.stars .on { color: var(--wake) }
+.kpi { font: 600 34px/1.1 var(--display); font-variant-numeric: tabular-nums }
+table { width: 100%; border-collapse: collapse; font-size: 16px }
+th, td { padding: 8px 0; text-align: right; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums }
+th:first-child, td:first-child { text-align: left }
+thead th { border-top: 0; color: var(--muted); font-weight: 400; font-size: 14px }
+.week { display: flex; flex-direction: column; gap: 8px }
+.wk { display: grid; grid-template-columns: 34px minmax(0, 1fr) 62px; gap: 8px; align-items: center; font-size: 15px }
+.wk .ribbon { height: 24px; border-radius: 6px }
+.wk .seg { border-radius: 3px }
+
+/* Tabs */
+nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: var(--surface); border-top: 1px solid var(--line);
+  display: flex; justify-content: center; padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px) }
+nav.tabs button { flex: 1; max-width: 160px; min-height: 64px; font: 500 14px var(--display); color: var(--muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px }
+nav.tabs svg { width: 24px; height: 24px }
+nav.tabs button[aria-current="page"] { color: var(--accent) }
+
+/* Questions */
+.q { display: flex; flex-direction: column; gap: 20px; padding-top: 3vh }
+.steps { display: flex; gap: 4px; color: var(--sunken) }
+.steps svg { width: 26px; height: 26px; flex: 0 1 26px; min-width: 0 }
+.steps .on { color: var(--wake) }
+.q h1 { font-size: 30px }
+.opts { display: flex; flex-direction: column; gap: 10px }
+.opt { min-height: 60px; border-radius: 22px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); text-align: left; font-weight: 700 }
+.opt span { display: block; font-weight: 400; font-size: 15px; color: var(--muted) }
+.field { width: 100%; min-height: 60px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); padding: 12px 14px; font-size: 20px }
+.q .main-btn { min-height: 64px; font-size: 20px }
+.err { color: var(--warn); font-size: 15px }
+
+/* Sheet */
+#sheet { position: fixed; inset: 0; z-index: 20; background: rgba(8, 14, 20, .55); display: flex; align-items: flex-end; justify-content: center }
+#sheet[hidden] { display: none }
+.panel { background: var(--bg); width: 100%; max-width: 480px; max-height: 92%; overflow: auto; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; gap: 14px;
+  padding-block: 18px calc(18px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.panel label { display: flex; flex-direction: column; gap: 4px; font-size: 15px; color: var(--muted); min-width: 0 }
+.panel .field { min-height: 52px; font-size: 18px; color: var(--ink) }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.acts { display: flex; gap: 10px; flex-wrap: wrap }
+.acts .main-btn { min-height: 56px; font-size: 18px; flex: 1 1 140px; width: auto }
+.plain { min-height: 56px; padding: 0 16px; border-radius: 16px; background: var(--sunken); font-weight: 700 }
+.danger { color: var(--warn) }
+
+/* Toast */
+#toast { position: fixed; z-index: 15; left: 0; right: 0; bottom: calc(68px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); pointer-events: none }
+.toast { pointer-events: auto; background: var(--ink); color: var(--bg); border-radius: 22px; padding: 10px 14px; max-width: 448px; width: 100%; display: flex; flex-direction: column; gap: 8px; font-size: 16px }
+.toast .chips button { background: transparent; box-shadow: inset 0 0 0 1.5px var(--bg); color: var(--bg); min-height: 40px; padding: 4px 12px; border-radius: 10px; font-weight: 700; font-size: 15px }
+.loading { text-align: center; padding: 18vh 0; color: var(--muted) }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
+</style>
+
+<div id="app"><p class="loading">Schlummerzeit lädt deine Daten …</p></div>
+<div id="toast" aria-live="polite"></div>
+<div id="sheet" hidden></div>
+
+<script>
+/*ENGINE*/
+const M = 60000, H = 60 * M, D = 24 * H;
+const NIGHT_END = 300; // before 05:00 a wake-up counts as a night waking, not as morning
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const dayMin = t => { const d = new Date(t); return d.getHours() * 60 + d.getMinutes(); };
+const atMin = (t, m) => { const d = new Date(t); d.setHours(0, m, 0, 0); return d.getTime(); };
+
+// Age anchors: [weeks, first wake window, last wake window, naps, nap minutes].
+const AGE = [
+  [0, 45, 60, 5, 55], [6, 60, 85, 5, 50], [12, 80, 110, 4, 50], [17, 105, 140, 4, 55], [22, 130, 165, 3, 60],
+  [30, 150, 195, 3, 60], [36, 175, 225, 2, 75], [48, 210, 255, 2, 75], [60, 250, 300, 2, 65],
+  [72, 280, 320, 1, 120], [104, 300, 345, 1, 110], [156, 330, 360, 1, 90],
+];
+
+function ageWeeks(profile, now) {
+  const w = (now - new Date(profile.birth + 'T12:00').getTime()) / (7 * D);
+  const corrected = w < 104 ? w - (profile.weeksEarly || 0) : w;
+  return Math.max(0, corrected);
+}
+
+function baseline(weeks) {
+  let i = 0;
+  while (i < AGE.length - 2 && AGE[i + 1][0] <= weeks) i++;
+  const a = AGE[i], b = AGE[i + 1], t = clamp((weeks - a[0]) / (b[0] - a[0]), 0, 1);
+  const mix = k => a[k] + (b[k] - a[k]) * t;
+  return { first: mix(1), last: mix(2), naps: a[3], napLen: mix(4) };
+}
+
+function priors(profile, now) {
+  const age = ageWeeks(profile, now), b = baseline(age);
+  const mid = (b.first + b.last) / 2;
+  // The parent's answer moves the age value, but only within a sane range.
+  const scale = profile.ww ? 1 + (clamp(profile.ww / mid, .7, 1.4) - 1) * .7 : 1;
+  const bed = profile.bed < NIGHT_END ? profile.bed + 1440 : profile.bed;
+  return {
+    age, first: b.first * scale, mid: mid * scale, last: b.last * scale,
+    naps: profile.naps || b.naps, napLen: profile.napLen ? (profile.napLen + b.napLen) / 2 : b.napLen,
+    wake: profile.wake, bed, ageBase: b,
+  };
+}
+
+const sorted = list => [...list].sort((a, b) => a.start - b.start);
+
+// Splits the log into days: morning wake-up, naps, then the evening's bedtime.
+function buildDays(sl) {
+  const nights = sl.filter(s => s.type === 'night');
+  const mornings = nights.filter((s, i) => {
+    if (!s.end) return false;
+    const m = dayMin(s.end), nx = nights[i + 1];
+    return m >= NIGHT_END && m <= 720 && !(nx && nx.start - s.end < 2 * H);
+  });
+  const beds = nights.filter((s, i) => {
+    const m = dayMin(s.start), pv = nights[i - 1];
+    return (m >= 960 || m < 120) && !(pv && pv.end && s.start - pv.end < 6 * H);
+  });
+  return mornings.map(m => {
+    const bed = beds.find(b => b.start > m.end && b.start < m.end + 20 * H) || null;
+    const until = bed ? bed.start : m.end + 18 * H;
+    return { wake: m.end, bed, naps: sl.filter(s => s.type === 'nap' && s.start >= m.end && s.start < until) };
+  });
+}
+
+// Prior plus weighted observations; the prior counts like k good observations.
+function blend(prior, obs, k) {
+  let sw = 0, sv = 0;
+  for (const o of obs) { sw += o.w; sv += o.w * o.v; }
+  return (k * prior + sv) / (k + sw);
+}
+
+function learn(profile, sleeps, now) {
+  const pri = priors(profile, now), cut = now - 14 * D;
+  const sl = sorted(sleeps).filter(s => s.start < now);
+  const rec = t => Math.pow(.5, (now - t) / (5 * D));
+  const settleW = { fast: 1.3, normal: 1, slow: .6 };
+  const first = [], mid = [], last = [], lens = [], counts = [], wakes = [], beds = [];
+  const days = buildDays(sl).filter(d => d.wake >= cut);
+  const covered = new Set();
+  for (const d of days) {
+    let prev = d.wake, open = false;
+    d.naps.forEach((n, i) => {
+      covered.add(n);
+      const ww = (n.start - prev) / M, dur = n.end ? (n.end - n.start) / M : null;
+      if (ww >= 15 && ww <= 480) {
+        const q = dur == null ? 1 : dur < 30 ? .5 : dur >= 45 ? 1.2 : 1;
+        (i ? mid : first).push({ v: ww, w: rec(n.start) * q * (settleW[n.settle] || 1) });
+      }
+      if (dur != null && dur >= 5) (lens[i] = lens[i] || []).push({ v: dur, w: rec(n.start) });
+      if (n.end) prev = n.end; else open = true;
+    });
+    wakes.push({ v: dayMin(d.wake), w: rec(d.wake) });
+    if (d.bed && !open) {
+      const ww = (d.bed.start - prev) / M;
+      if (ww >= 15 && ww <= 480) last.push({ v: ww, w: rec(d.bed.start) * (settleW[d.bed.settle] || 1) });
+      const b = dayMin(d.bed.start);
+      beds.push({ v: b < NIGHT_END ? b + 1440 : b, w: rec(d.bed.start) });
+      counts.push({ v: d.naps.length, w: rec(d.wake) });
+    }
+  }
+  // Naps on days without a logged night still teach the middle wake window.
+  const loose = sl.filter(s => s.type === 'nap' && s.end && s.start >= cut && !covered.has(s));
+  loose.forEach((n, i) => {
+    const pv = loose[i - 1];
+    const dur = (n.end - n.start) / M;
+    if (dur >= 5) (lens[1] = lens[1] || []).push({ v: dur, w: rec(n.start) });
+    if (!pv) return;
+    const ww = (n.start - pv.end) / M;
+    if (ww >= 15 && ww <= 480) mid.push({ v: ww, w: rec(n.start) });
+  });
+
+  const fence = (v, p) => clamp(v, p * .6, p * 1.6);
+  const napDays = new Set(sl.filter(s => s.end && s.start >= cut).map(s => new Date(s.start).toDateString()));
+  return {
+    age: pri.age, prior: pri,
+    wwFirst: fence(blend(pri.first, first, 3), pri.first),
+    wwMid: fence(blend(pri.mid, mid, 3), pri.mid),
+    wwLast: fence(blend(pri.last, last, 3), pri.last),
+    napCount: Math.max(1, Math.round(blend(pri.naps, counts, 2))),
+    napLen: i => blend(pri.napLen, lens[i] || [], 3),
+    wake: blend(pri.wake, wakes, 2),
+    bed: blend(pri.bed, beds, 2),
+    daysLogged: napDays.size,
+    observations: first.length + mid.length + last.length,
+  };
+}
+
+function project(model, cursor, idx, target, lastDur, now) {
+  const items = [];
+  let sd = lastDur;
+  while (idx < model.napCount) {
+    let ww = idx === 0 ? model.wwFirst : model.wwMid;
+    if (sd != null && sd < 35) ww *= .85;
+    const start = Math.max(cursor + ww * M, now), len = model.napLen(idx), end = start + len * M;
+    if (end + model.wwLast * .75 * M > target + 30 * M) break;
+    items.push({ kind: 'nap', start, end, idx });
+    cursor = end; sd = len; idx++;
+  }
+  // A long gap to bedtime for a young baby: suggest a short extra nap.
+  if (model.age < 39 && target - cursor > model.wwLast * 1.6 * M) {
+    const start = Math.max(cursor + model.wwMid * M, now), end = start + 25 * M;
+    if (end + model.wwLast * .75 * M <= target + 15 * M && start < target - 90 * M) {
+      items.push({ kind: 'nap', start, end, idx, cat: true });
+      cursor = end; sd = 25;
+    }
+  }
+  let ww = model.wwLast;
+  if (sd != null && sd < 35) ww *= .9;
+  const bed = Math.max(clamp(cursor + ww * M, target - 60 * M, target + 45 * M), cursor + 30 * M, now);
+  return { items, bed, cursor };
+}
+
+function plan(profile, sleeps, now) {
+  const sl = sorted(sleeps).filter(s => s.start <= now);
+  const model = learn(profile, sl, now);
+  const active = sl.find(s => !s.end) || null;
+  const res = { model, active, state: 'awake', items: [], done: [], bed: null, next: null, wake: null, wakeEstimated: false, reason: '', since: null, predictedEnd: null };
+  const nextWake = from => { let t = atMin(from, model.wake); if (t <= from) t += D; return t; };
+
+  if (active && active.type === 'night') {
+    res.state = 'night';
+    res.predictedEnd = Math.max(nextWake(active.start), now + 20 * M);
+    res.since = active.start;
+    const pr = project(model, res.predictedEnd, 0, atMin(res.predictedEnd, model.bed), null, res.predictedEnd);
+    res.items = pr.items; res.bed = pr.bed; res.tomorrow = true;
+    return res;
+  }
+
+  const days = buildDays(sl);
+  const anchor = days.length ? days[days.length - 1].wake : null;
+  const min = dayMin(now);
+  let wake = anchor && now - anchor < 20 * H ? anchor : null;
+  const last = [...sl].reverse().find(s => s.end);
+
+  if (min < NIGHT_END || (wake == null && !active && last && last.type === 'night' && now - last.end < 3 * H && dayMin(last.end) < NIGHT_END)) {
+    res.state = 'nightawake';
+    res.since = last ? last.end : now;
+    res.predictedEnd = nextWake(now);
+    res.next = { kind: 'bed', start: now };
+    const pr = project(model, res.predictedEnd, 0, atMin(res.predictedEnd, model.bed), null, res.predictedEnd);
+    res.items = pr.items; res.bed = pr.bed; res.tomorrow = true;
+    return res;
+  }
+
+  if (wake == null) {
+    wake = Math.min(atMin(now, model.wake), now);
+    res.wakeEstimated = true;
+  }
+  res.wake = wake;
+  const target = atMin(wake, model.bed);
+  if (!active && now > target + 3 * H) {
+    res.state = 'nightawake';
+    res.since = last ? last.end : now;
+    res.predictedEnd = nextWake(now);
+    res.next = { kind: 'bed', start: now };
+    const pr = project(model, res.predictedEnd, 0, atMin(res.predictedEnd, model.bed), null, res.predictedEnd);
+    res.items = pr.items; res.bed = pr.bed; res.tomorrow = true;
+    return res;
+  }
+
+  res.done = sl.filter(s => s.type === 'nap' && s.start >= wake);
+  let idx = res.done.length, cursor = wake, lastDur = null;
+  const ended = res.done.filter(s => s.end);
+  if (ended.length) {
+    const e = ended[ended.length - 1];
+    cursor = e.end; lastDur = (e.end - e.start) / M;
+  }
+  if (active) {
+    res.state = 'nap';
+    res.since = active.start;
+    const expected = model.napLen(idx - 1);
+    res.predictedEnd = Math.max(active.start + expected * M, now + 5 * M);
+    cursor = res.predictedEnd; lastDur = expected;
+  } else {
+    res.since = cursor;
+  }
+  const pr = project(model, cursor, idx, target, lastDur, now);
+  res.items = pr.items; res.bed = pr.bed;
+  res.next = pr.items[0] || { kind: 'bed', start: pr.bed };
+  res.cursor = cursor;
+  if (!active && lastDur != null && lastDur < 35) res.reason = 'Das letzte Schläfchen war kurz, deshalb plane ich den nächsten Schlaf etwas früher ein.';
+  else if (pr.items[0] && pr.items[0].cat) res.reason = 'Bis zur Nacht ist es noch lange hin. Ein kurzes Extra-Schläfchen kann helfen.';
+  return res;
+}
+
+// Replays the log: what would the app have said before each real sleep?
+function accuracy(profile, sleeps, now) {
+  const sl = sorted(sleeps).filter(s => s.end);
+  const targets = sl.filter(s => s.type === 'nap' && s.start > now - 14 * D).slice(-24);
+  const errs = [];
+  for (const t of targets) {
+    const before = sl.filter(s => s.end <= t.start);
+    const prev = before[before.length - 1];
+    if (!prev || t.start - prev.end > 10 * H) continue;
+    const at = prev.end + M, p = plan(profile, before, at);
+    if (p.state !== 'awake' || !p.next) continue;
+    errs.push(Math.abs(p.next.start - t.start) / M);
+  }
+  return { n: errs.length, mae: errs.length ? errs.reduce((a, b) => a + b, 0) / errs.length : null };
+}
+
+const windowHalf = acc => acc.n >= 5 ? clamp(Math.round(acc.mae * .7), 8, 25) : 20;
+
+// Picks nap or night for a sleep that starts now, so the button needs no choice.
+function typeFor(p, now) {
+  if (p.state === 'night' || p.state === 'nightawake') return 'night';
+  const min = dayMin(now), bed = p.model.bed;
+  if (min < NIGHT_END || min >= bed - 60) return 'night';
+  if (p.next && p.next.kind === 'bed' && now >= p.next.start - 45 * M) return 'night';
+  return 'nap';
+}
+/*END*/
+</script>
+
+<script>
+const $app = document.getElementById('app'), $toast = document.getElementById('toast'), $sheet = document.getElementById('sheet');
+const S = { boot: true, profile: null, sleeps: [], tab: 'heute', ob: null, prompt: null, note: '', local: false, sheet: null, readonly: false };
+let db = null, toastTimer = null, accCache = { key: '', value: { n: 0, mae: null } };
+
+/* ---------- Format ---------- */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const clock = t => { const d = new Date(t); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const minClock = m => pad(Math.floor((m % 1440) / 60)) + ':' + pad(Math.round(m % 60) % 60);
+const round5 = t => Math.round(t / (5 * M)) * 5 * M;
+function dur(min) {
+  min = Math.max(0, Math.round(min));
+  const h = Math.floor(min / 60), m = min % 60;
+  if (!h) return m + ' Min.';
+  return m ? h + ' Std. ' + m + ' Min.' : h + ' Std.';
+}
+const toMin = str => { const [h, m] = str.split(':').map(Number); return h * 60 + m; };
+const isoDate = t => { const d = new Date(t); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+const who = () => S.profile && S.profile.name ? S.profile.name : 'dein Baby';
+const Who = () => S.profile && S.profile.name ? S.profile.name : 'Dein Baby';
+function ageLabel(now) {
+  const days = (now - new Date(S.profile.birth + 'T12:00').getTime()) / D;
+  if (days < 56) { const w = Math.floor(days / 7); return w === 1 ? '1 Woche' : w + ' Wochen'; }
+  const m = Math.floor(days / 30.44);
+  return m < 24 ? (m + ' Monate') : (Math.floor(m / 12) + ' Jahre');
+}
+function getAcc() {
+  const key = S.sleeps.length + ':' + S.sleeps.reduce((a, s) => a + (s.end || 0) + s.start, 0);
+  if (key !== accCache.key) accCache = { key, value: accuracy(S.profile, S.sleeps, Date.now()) };
+  return accCache.value;
+}
+
+/* ---------- Storage ---------- */
+const LS = 'schlummerzeit.v1';
+function readLocal() { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch (e) { return {}; } }
+function writeLocal() { try { localStorage.setItem(LS, JSON.stringify({ profile: S.profile, sleeps: S.sleeps })); } catch (e) {} }
+function writeFailed(e) {
+  if (e && e.code === 'invalid_argument') { S.readonly = true; toast('Du kannst hier nur ansehen, nicht eintragen.'); }
+  else toast('Speichern hat nicht geklappt. Bitte versuche es gleich noch einmal.');
+}
+function saveProfile(p) {
+  S.profile = p; writeLocal(); render();
+  if (db) db.doc('baby/profile').set(p).catch(writeFailed);
+}
+function saveSleep(s) {
+  const i = S.sleeps.findIndex(x => x.id === s.id);
+  if (i >= 0) S.sleeps[i] = s; else S.sleeps.push(s);
+  writeLocal(); render();
+  if (db) db.doc('sleeps/' + s.id).set(s).catch(writeFailed);
+}
+function removeSleep(id) {
+  S.sleeps = S.sleeps.filter(x => x.id !== id);
+  writeLocal(); render();
+  if (db) db.doc('sleeps/' + id).delete().catch(writeFailed);
+}
+async function resetAll() {
+  const ids = S.sleeps.map(s => s.id);
+  S.sleeps = []; S.profile = null; writeLocal();
+  startQuestions(); render();
+  if (db) {
+    try {
+      for (const id of ids) await db.doc('sleeps/' + id).delete();
+      await db.doc('baby/profile').delete();
+    } catch (e) { writeFailed(e); }
+  }
+}
+async function boot() {
+  const saved = readLocal();
+  let cap = null;
+  try { cap = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) {}
+  if (!cap) {
+    S.local = true; S.profile = saved.profile || null; S.sleeps = saved.sleeps || []; S.boot = false;
+    if (!S.profile) startQuestions();
+    render(); return;
+  }
+  db = cap;
+  let gotP = false, gotS = false;
+  const ready = () => {
+    if (!gotP || !gotS || !S.boot) return;
+    S.boot = false; clearTimeout(slow); S.note = '';
+    if (!S.profile) startQuestions();
+    render();
+  };
+  // Data stays out of reach: show the last copy of this device instead of a spinner.
+  const slow = setTimeout(() => {
+    if (!S.boot) return;
+    S.boot = false; S.profile = saved.profile || null; S.sleeps = saved.sleeps || [];
+    S.note = 'Deine Daten sind gerade nicht erreichbar. Du siehst den letzten Stand von diesem Gerät.';
+    if (!S.profile) startQuestions();
+    render();
+  }, 10000);
+  const failed = e => { clearTimeout(slow); if (S.boot) { S.boot = false; S.note = 'Deine Daten konnten nicht geladen werden.'; S.profile = saved.profile || null; S.sleeps = saved.sleeps || []; if (!S.profile) startQuestions(); render(); } };
+  db.doc('baby/profile').onSnapshot(snap => {
+    if (snap.metadata.fromCache && !snap.exists) return;
+    gotP = true; S.profile = snap.exists ? { ...snap.data() } : null;
+    if (S.profile && S.ob) S.ob = null;
+    writeLocal(); S.boot ? ready() : render();
+  }, failed);
+  db.collection('sleeps').orderBy('start', 'desc').limit(1000).onSnapshot(snap => {
+    gotS = true; S.sleeps = snap.docs.map(d => ({ ...d.data() }));
+    writeLocal(); S.boot ? ready() : render();
+  }, failed);
+}
+
+/* ---------- Questions ---------- */
+const QS = [
+  { key: 'name', type: 'text', title: 'Wie heißt dein Baby?', hint: 'Du kannst das auch leer lassen.' },
+  { key: 'birth', type: 'date', title: 'Wann wurde {n} geboren?', hint: 'Das Alter ist der wichtigste Startwert.' },
+  { key: 'weeksEarly', type: 'opts', title: 'Kam {n} zu früh?', hint: 'Dann rechne ich mit dem korrigierten Alter.', opts: [['Nein, etwa zum Termin', 0], ['2 bis 4 Wochen früher', 3], ['5 bis 8 Wochen früher', 6], ['Mehr als 8 Wochen früher', 10]] },
+  { key: 'wake', type: 'time', title: 'Wann beginnt der Tag meistens?', hint: 'Die ungefähre Aufwachzeit am Morgen reicht.', def: '07:00' },
+  { key: 'bed', type: 'time', title: 'Wann beginnt die Nacht meistens?', hint: 'Die Zeit, zu der {n} abends einschläft.', def: '19:30' },
+  { key: 'naps', type: 'opts', title: 'Wie viele Schläfchen macht {n} am Tag?', opts: [['1', 1], ['2', 2], ['3', 3], ['4', 4], ['5 oder mehr', 5], ['Ist jeden Tag anders', 0, 'Dann starte ich mit dem Durchschnitt für das Alter.']] },
+  { key: 'napLen', type: 'opts', title: 'Wie lange dauert ein Schläfchen meistens?', opts: [['Kurz, etwa 30 Minuten', 30], ['Etwa 1 Stunde', 60], ['Etwa 1,5 Stunden', 90], ['2 Stunden oder länger', 120], ['Ganz unterschiedlich', 0]] },
+  { key: 'ww', type: 'opts', title: 'Wie lange bleibt {n} zwischen zwei Schläfchen wach?', hint: 'Bis die ersten Müdigkeitszeichen kommen.', opts: [['Etwa 1 Stunde', 60], ['Etwa 1,5 Stunden', 90], ['Etwa 2 Stunden', 120], ['Etwa 3 Stunden', 180], ['4 Stunden oder mehr', 240], ['Weiß ich nicht', 0, 'Kein Problem. Das lerne ich aus dem Tracking.']] },
+];
+function startQuestions(prefill) { S.ob = { i: 0, a: { ...(prefill || {}) }, err: '' }; }
+function renderQuestions() {
+  const { i, a, err } = S.ob, q = QS[i];
+  const n = a.name ? esc(a.name) : 'dein Baby';
+  const fill = s => esc(s || '').replace('{n}', n);
+  const title = fill(q.title).replace(/^dein/, 'Dein');
+  let body = '';
+  if (q.type === 'opts') {
+    body = `<div class="opts">${q.opts.map(o => `<button class="opt" data-act="ob-opt" data-v="${o[1]}">${esc(o[0])}${o[2] ? `<span>${esc(o[2])}</span>` : ''}</button>`).join('')}</div>`;
+  } else {
+    const val = q.type === 'time' ? (a[q.key] != null ? minClock(a[q.key]) : q.def) : (a[q.key] || '');
+    const extra = q.type === 'date' ? ` max="${isoDate(Date.now())}"` : q.type === 'text' ? ' autocomplete="off" maxlength="30" placeholder="Zum Beispiel Mia"' : '';
+    body = `<input class="field" id="q-${q.key}" type="${q.type}" value="${esc(val)}"${extra} aria-label="${title}">
+      ${err ? `<p class="err">${esc(err)}</p>` : ''}
+      <button class="main-btn" data-act="ob-next">Weiter</button>`;
+  }
+  $app.innerHTML = `<section class="q">
+    <div class="steps" role="img" aria-label="Frage ${i + 1} von ${QS.length}">${QS.map((_, k) => ICON.star(k <= i ? 'on' : '')).join('')}</div>
+    <div class="section"><h1>${title}</h1>${q.hint ? `<p class="muted">${fill(q.hint)}</p>` : ''}</div>
+    ${body}
+    ${i ? '<button class="link" data-act="ob-back">Zurück</button>' : ''}
+  </section>`;
+}
+function obAnswer(v) {
+  const ob = S.ob;
+  ob.a[QS[ob.i].key] = v; ob.err = '';
+  if (ob.i < QS.length - 1) { ob.i++; render(); return; }
+  const p = { name: '', ...ob.a };
+  S.ob = null; S.tab = 'heute';
+  saveProfile(p);
+  toast('Fertig. Tippe bei jedem Schlaf auf den großen Knopf, dann wird die Vorhersage genauer.');
+}
+function obNext() {
+  const q = QS[S.ob.i], el = document.getElementById('q-' + q.key), v = el.value.trim();
+  if (q.type === 'text') return obAnswer(v);
+  if (q.type === 'date') {
+    const t = new Date(v + 'T12:00').getTime();
+    if (!v || isNaN(t)) { S.ob.err = 'Bitte wähle ein Datum aus.'; return render(); }
+    if (t > Date.now()) { S.ob.err = 'Das Datum liegt in der Zukunft. Bitte prüfe es noch einmal.'; return render(); }
+    return obAnswer(v);
+  }
+  if (q.type === 'time') {
+    if (!v) { S.ob.err = 'Bitte trage eine Uhrzeit ein.'; return render(); }
+    return obAnswer(toMin(v));
+  }
+}
+
+/* ---------- Today ---------- */
+const svgI = (body, cls) => `<svg class="${cls || ''}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${body}</svg>`;
+const ICON = {
+  moon: c => svgI('<path d="M20.5 14.6A8.8 8.8 0 0 1 9.4 3.5a.6.6 0 0 0-.8-.7 9.8 9.8 0 1 0 12.6 12.6.6.6 0 0 0-.7-.8Z"/>', c),
+  sun: c => svgI('<circle cx="12" cy="12" r="5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', c),
+  cloud: c => svgI('<path d="M7 19a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.6 4.8 4.8 0 0 1 17.5 19Z"/>', c),
+  star: c => svgI('<path d="M12 2.8c.5 0 .9.3 1.100.7l2.300 4.900 5.300.7c1 .1 1.400 1.400.7 2.100l-3.900 3.700 1 5.300c.2 1-.9 1.800-1.800 1.300L12 18.800l-4.700 2.600c-.9.500-2-.3-1.800-1.300l1-5.300-3.900-3.700c-.7-.7-.3-2 .7-2.100l5.300-.7 2.300-4.900c.2-.4.6-.7 1.100-.7Z"/>', c),
+  chart: c => svgI('<rect x="4" y="11" width="4" height="9" rx="2"/><rect x="10" y="5" width="4" height="15" rx="2"/><rect x="16" y="14" width="4" height="6" rx="2"/>', c),
+  gear: c => svgI('<path d="M4 7h10M18 7h2M4 17h2M10 17h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.500"/><circle cx="8" cy="17" r="2.500"/>', c),
+};
+const CLOUDS = `<g class="cloud"><ellipse cx="42" cy="176" rx="46" ry="16"/><circle cx="26" cy="166" r="14"/><circle cx="50" cy="160" r="19"/></g>
+  <g class="cloud two"><ellipse cx="284" cy="178" rx="50" ry="16"/><circle cx="268" cy="166" r="17"/><circle cx="294" cy="162" r="14"/></g>`;
+const STARS = [[40, 34], [92, 16], [228, 18], [282, 40], [18, 86], [304, 96], [160, 88]].map(([x, y]) => `<circle class="star" cx="${x}" cy="${y}" r="${x % 3 ? 1.800 : 2.600}"/>`).join('');
+// The sky: the sun or sleeping moon travels along the arc as time passes.
+function scene(mode, progress, zoneFrom) {
+  const p = 'M 30 170 A 130 130 0 0 1 290 170', v = clamp(progress, 0, 1);
+  const a = Math.PI * (1 - v), x = 160 + 130 * Math.cos(a), y = 170 - 130 * Math.sin(a);
+  const zone = zoneFrom != null ? `<path class="sky-zone" d="${p}" pathLength="100" stroke-dasharray="${(100 - zoneFrom * 100).toFixed(1)} 200" stroke-dashoffset="${(-zoneFrom * 100).toFixed(1)}"/>` : '';
+  const body = mode === 'day'
+    ? `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})" fill="#FFC94D"><g stroke="#FFC94D" stroke-width="3.500" stroke-linecap="round">${[0, 45, 90, 135, 180, 225, 270, 315].map(r => `<path transform="rotate(${r})" d="M0 -21V-26"/>`).join('')}</g><circle r="16"/></g>`
+    : `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><path fill="#FFE08A" d="M6 -20A21 21 0 1 0 21 7 17 17 0 0 1 6 -20Z"/><path d="M-11 -2q3 3 6 0M-8 9q4 3 8 0" fill="none" stroke="#7A5B14" stroke-width="2" stroke-linecap="round"/><text class="zzz" x="19" y="-16">z</text><text class="zzz" x="29" y="-27" style="animation-delay:1s">z</text></g>`;
+  return `<svg viewBox="0 0 320 192" aria-hidden="true">${mode === 'day' ? '' : STARS}${CLOUDS}<path class="sky-track" d="${p}" pathLength="100"/>${zone}<path class="sky-fill" d="${p}" pathLength="100" stroke-dasharray="${Math.max(v * 100, .1).toFixed(1)} 200"/>${body}</svg>`;
+}
+function hero(p, now) {
+  const half = windowHalf(getAcc());
+  if (p.state === 'nap' || p.state === 'night') {
+    const total = p.predictedEnd - p.since, elapsed = now - p.since;
+    const isNap = p.state === 'nap';
+    const a = round5(p.predictedEnd - half * M), b = round5(p.predictedEnd + half * M);
+    return `<div class="sky ${isNap ? 'nap' : 'night'}">${scene(isNap ? 'nap' : 'night', elapsed / total)}
+      <div class="sky-text"><span class="arc-eyebrow">${isNap ? 'Schläfchen läuft' : 'Nachtschlaf läuft'}</span>
+      <span class="arc-big" data-timer="${p.since}">${timer(now - p.since)}</span>
+      <span class="arc-sub num">Wach gegen ${clock(a)} bis ${clock(b)}</span></div></div>
+      <button class="main-btn wake" data-act="stop">${ICON.sun()}${esc(Who())} ist wach</button>`;
+  }
+  if (p.state === 'nightawake') {
+    return `<div class="sky night">${scene('night', .5)}
+      <div class="sky-text"><span class="arc-eyebrow">Nachtruhe</span><span class="arc-big" style="font-size:32px">Gute Nacht</span>
+      <span class="arc-sub num">Morgen früh gegen ${clock(round5(p.predictedEnd))}</span></div></div>
+      <button class="main-btn" data-act="start">${ICON.moon()}Schlaf starten</button>`;
+  }
+  const n = p.next, a = round5(n.start - half * M), b = round5(n.start + half * M);
+  const isBed = n.kind === 'bed';
+  const total = Math.max(b - p.cursor, M), left = Math.round((a - now) / M);
+  const big = left > 0 ? 'in ' + dur(left) : 'Jetzt';
+  const size = left >= 60 ? ' style="font-size:27px"' : '';
+  return `<div class="sky day">${scene('day', (now - p.cursor) / total, clamp((a - p.cursor) / total, 0, 1))}
+    <div class="sky-text"><span class="arc-eyebrow">${isBed ? 'Nachtschlaf' : n.cat ? 'Kurzes Extra-Schläfchen' : 'Nächstes Schläfchen'}</span>
+    <span class="arc-big"${size}>${big}</span>
+    <span class="arc-sub num">${clock(a)} bis ${clock(b)} Uhr</span></div></div>
+    <button class="main-btn" data-act="start">${ICON.moon()}Schlaf starten</button>
+    ${p.reason ? `<p class="reason">${esc(p.reason)}</p>` : ''}`;
+}
+const timer = ms => { const s = Math.floor(ms / 1000); return Math.floor(s / 3600) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60); };
+
+function ribbon(p, now) {
+  const items = [], dayOf = p.tomorrow ? p.predictedEnd : now;
+  let lo = atMin(dayOf, 360), hi = atMin(dayOf, 1320);
+  const wake = p.tomorrow ? p.predictedEnd : p.wake;
+  lo = Math.min(lo, wake - 30 * M);
+  const bed = p.bed;
+  hi = Math.max(hi, bed + 60 * M);
+  const pos = t => ((t - lo) / (hi - lo)) * 100;
+  const seg = (s, e, cls, label, id) => {
+    const l = clamp(pos(s), 0, 100), r = clamp(pos(e), 0, 100);
+    if (r <= l) return '';
+    const st = `left:${l.toFixed(2)}%;width:${(r - l).toFixed(2)}%`;
+    return id ? `<button class="seg ${cls}" style="${st}" title="${esc(label)}" aria-label="${esc(label)}, bearbeiten" data-act="edit" data-id="${id}"></button>`
+      : `<i class="seg ${cls}" style="${st}" title="${esc(label)}"></i>`;
+  };
+  if (!p.tomorrow) {
+    for (const s of S.sleeps) {
+      if (s.end && s.end <= lo || s.start >= hi) continue;
+      if (s.id === (p.active && p.active.id)) continue;
+      items.push(seg(s.start, s.end || now, s.type, `${s.type === 'nap' ? 'Schläfchen' : 'Nacht'} ${clock(s.start)} bis ${clock(s.end || now)}`, s.id));
+    }
+    if (p.active) {
+      items.push(seg(p.active.start, now, p.active.type, 'Läuft seit ' + clock(p.active.start), p.active.id));
+      items.push(seg(now, p.predictedEnd, 'plan ' + p.active.type, 'Erwartetes Ende ' + clock(p.predictedEnd)));
+    }
+  }
+  p.items.forEach(i => items.push(seg(i.start, i.end, 'plan', `Vorhersage ${clock(i.start)} bis ${clock(i.end)}`)));
+  items.push(seg(bed, hi, 'plan night', 'Nacht ab ' + clock(bed)));
+  const nowLine = now > lo && now < hi ? `<i class="nowline" style="left:${pos(now).toFixed(2)}%" title="Jetzt"></i>` : '';
+  const ticks = [];
+  const start = new Date(lo); start.setMinutes(0, 0, 0);
+  for (let t = start.getTime(); t <= hi; t += H) {
+    const h = new Date(t).getHours();
+    if (h % 3 === 0 && t >= lo) ticks.push(`<span style="left:${pos(t).toFixed(1)}%">${h}</span>`);
+  }
+  return `<div class="section"><h2>${p.tomorrow ? 'Morgen' : 'Heute'}</h2>
+    <div><div class="ribbon" role="img" aria-label="Tagesverlauf, Details stehen in der Liste darunter">${items.join('')}${nowLine}</div>
+    <div class="ticks">${ticks.join('')}</div></div>
+    <div class="legend"><span><i style="background:var(--nap)"></i>Schläfchen</span><span><i style="background:var(--night)"></i>Nacht</span><span><i style="background:repeating-linear-gradient(135deg,var(--muted) 0 2px,transparent 2px 5px);box-shadow:inset 0 0 0 1.5px var(--muted)"></i>Vorhersage</span></div></div>`;
+}
+function dayRows(p, now) {
+  const rows = [];
+  if (p.wake && !p.tomorrow) rows.push({ t: p.wake, html: `${ICON.moon('ico night')}<span><b>Aufgewacht</b>${p.wakeEstimated ? '<br><span class="muted small">geschätzt</span>' : ''}</span><span class="t">${clock(p.wake)}</span>` });
+  if (p.tomorrow && p.predictedEnd) rows.push({ t: 0, html: `${ICON.moon('ico night plan')}<b>Aufwachen</b><span class="t">ca. ${clock(round5(p.predictedEnd))}</span>` });
+  if (!p.tomorrow) p.done.forEach((s, i) => rows.push({ t: s.start, id: s.id, html: `${ICON.cloud('ico')}<span><b>Schläfchen ${i + 1}</b><br><span class="muted small">${s.end ? dur((s.end - s.start) / M) : 'läuft'}</span></span><span class="t">${clock(s.start)}${s.end ? ' – ' + clock(s.end) : ''}</span>` }));
+  const base = p.tomorrow ? 0 : p.done.length;
+  p.items.forEach((s, i) => rows.push({ t: s.start, html: `${ICON.cloud('ico plan')}<span><b>${s.cat ? 'Extra-Schläfchen' : 'Schläfchen ' + (base + i + 1)}</b><br><span class="muted small">etwa ${dur(round5((s.end - s.start)) / M)}</span></span><span class="t">ca. ${clock(round5(s.start))}</span>` }));
+  if (p.bed) rows.push({ t: p.bed, html: `${ICON.moon('ico night plan')}<b>Nacht</b><span class="t">ca. ${clock(round5(p.bed))}</span>` });
+  return `<div class="rows">${rows.map(r => r.id ? `<button class="row" data-act="edit" data-id="${r.id}">${r.html}</button>` : `<div class="row">${r.html}</div>`).join('')}</div>`;
+}
+function renderToday(now) {
+  const p = plan(S.profile, S.sleeps, now);
+  const prompted = S.prompt && S.sleeps.find(s => s.id === S.prompt);
+  return `<header class="top"><h1>${esc(Who())}</h1><span class="muted small">${ageLabel(now)}</span></header>
+    ${S.note ? `<p class="banner small">${esc(S.note)}</p>` : ''}
+    <section class="hero">${hero(p, now)}</section>
+    ${prompted ? `<div class="banner"><span>Wie schnell ist ${esc(who())} eingeschlafen?</span>
+      <div class="chips"><button class="chip" data-act="settle" data-v="fast">Sofort</button><button class="chip" data-act="settle" data-v="normal">Normal</button><button class="chip" data-act="settle" data-v="slow">Hat lange gedauert</button></div></div>` : ''}
+    ${p.wakeEstimated && !p.active ? `<div class="banner"><span>Noch keine Aufwachzeit für heute. Ich rechne mit ${clock(p.wake)} Uhr.</span>
+      <button class="link" data-act="add-morning">Aufwachzeit eintragen</button></div>` : ''}
+    ${ribbon(p, now)}
+    ${dayRows(p, now)}`;
+}
+
+/* ---------- History ---------- */
+function weekChart(now) {
+  const rows = [];
+  for (let i = 6; i >= 0; i--) {
+    const d0 = atMin(now - i * D, 0), d1 = atMin(d0 + 26 * H, 0);
+    let total = 0;
+    const segs = S.sleeps.map(s => {
+      const a = Math.max(s.start, d0), b = Math.min(s.end || now, d1);
+      if (b <= a) return '';
+      total += b - a;
+      const l = (a - d0) / (d1 - d0) * 100, w = (b - a) / (d1 - d0) * 100;
+      const label = `${s.type === 'nap' ? 'Schläfchen' : 'Nacht'} ${clock(s.start)} bis ${s.end ? clock(s.end) : 'jetzt'}`;
+      return `<button class="seg ${s.type}" style="left:${l.toFixed(2)}%;width:${w.toFixed(2)}%" title="${label}" aria-label="${label}, bearbeiten" data-act="edit" data-id="${s.id}"></button>`;
+    }).join('');
+    rows.push(`<div class="wk"><span class="num">${WD[new Date(d0).getDay()]}</span><div class="ribbon">${segs}</div><span class="num muted" style="text-align:right">${total ? (total / H).toFixed(1).replace('.', ',') + ' h' : '–'}</span></div>`);
+  }
+  const tick = (h, x) => `<span style="left:${x}%">${h}</span>`;
+  return `<div class="week">${rows.join('')}
+    <div class="wk"><span></span><div class="ticks">${tick(0, 0) + tick(6, 25) + tick(12, 50) + tick(18, 75) + tick(24, 100)}</div><span></span></div></div>
+    <div class="legend"><span><i style="background:var(--nap)"></i>Schläfchen</span><span><i style="background:var(--night)"></i>Nacht</span></div>`;
+}
+function renderHistory(now) {
+  const m = learn(S.profile, S.sleeps, now), acc = getAcc(), pri = m.prior;
+  const days = Math.min(m.daysLogged, 7);
+  const line = (l, a, b) => `<tr><td>${l}</td><td>${a}</td><td><b>${b}</b></td></tr>`;
+  const recent = sorted(S.sleeps).reverse().slice(0, 12);
+  const status = days >= 7 ? `Die Vorhersage kennt ${esc(who())} jetzt gut.` : `Noch ${7 - days} ${7 - days === 1 ? 'Tag' : 'Tage'} tracken, dann kennt die Vorhersage ${esc(who())} gut.`;
+  return `<header class="top"><h1>Verlauf</h1><button class="link" data-act="add">Schlaf nachtragen</button></header>
+    <section class="learn"><h2>Wie gut passt die Vorhersage?</h2>
+      ${acc.n >= 3 ? `<p class="kpi">± ${Math.round(acc.mae)} Min.</p><p class="muted small">Durchschnittliche Abweichung bei den letzten ${acc.n} Schläfchen.</p>` : `<p class="muted">Nach ein paar Schläfchen siehst du hier, wie weit die Vorhersage danebenlag.</p>`}
+      <div class="stars" role="img" aria-label="${days} von 7 Tagen getrackt">${[0, 1, 2, 3, 4, 5, 6].map(k => ICON.star(k < days ? 'on' : '')).join('')}</div>
+      <p class="small">${status}</p></section>
+    <section class="section"><h2>Letzte 7 Tage</h2>${weekChart(now)}</section>
+    <section class="section"><h2>Was die App gelernt hat</h2>
+      <div class="learn"><table><thead><tr><th>Wert</th><th>Start</th><th>Jetzt</th></tr></thead><tbody>
+      ${line('Wach bis 1. Schläfchen', dur(pri.first), dur(m.wwFirst))}
+      ${line('Wach zwischen Schläfchen', dur(pri.mid), dur(m.wwMid))}
+      ${line('Wach vor der Nacht', dur(pri.last), dur(m.wwLast))}
+      ${line('Schläfchen pro Tag', pri.naps, m.napCount)}
+      ${line('Aufwachen', minClock(pri.wake), minClock(m.wake))}
+      ${line('Nacht beginnt', minClock(pri.bed), minClock(m.bed))}
+      </tbody></table></div></section>
+    <section class="section"><h2>Einträge</h2>
+      ${recent.length ? `<div class="rows">${recent.map(s => `<button class="row" data-act="edit" data-id="${s.id}">${s.type === 'night' ? ICON.moon('ico night') : ICON.cloud('ico')}<span><b>${s.type === 'nap' ? 'Schläfchen' : 'Nacht'}</b><br><span class="muted small">${WD[new Date(s.start).getDay()]}, ${s.end ? dur((s.end - s.start) / M) : 'läuft'}</span></span><span class="t">${clock(s.start)}${s.end ? ' – ' + clock(s.end) : ''}</span></button>`).join('')}</div>`
+        : '<p class="muted">Noch nichts eingetragen. Starte den ersten Schlaf unter Heute oder trage ihn hier nach.</p>'}
+    </section>`;
+}
+
+/* ---------- Settings ---------- */
+function renderSettings() {
+  const pf = S.profile;
+  return `<header class="top"><h1>Einstellungen</h1></header>
+    <div class="rows">
+      <div class="row"><span></span><span>Name</span><span class="t">${esc(pf.name || '–')}</span></div>
+      <div class="row"><span></span><span>Geburtstag</span><span class="t">${pf.birth.split('-').reverse().join('.')}</span></div>
+      <div class="row"><span></span><span>Morgens wach</span><span class="t">${minClock(pf.wake)}</span></div>
+      <div class="row"><span></span><span>Abends im Bett</span><span class="t">${minClock(pf.bed)}</span></div>
+    </div>
+    <button class="plain" data-act="redo">Fragen neu beantworten</button>
+    <section class="section"><h2>So rechnet die App</h2>
+      <p class="muted small">Der Start beruht auf typischen Wachzeiten für das Alter und auf deinen Antworten. Mit jedem Eintrag zählt das echte Verhalten stärker, neuere Tage mehr als ältere. Schläfchen, die lang waren und bei denen ${esc(who())} schnell eingeschlafen ist, zählen besonders.</p>
+      <p class="muted small">Das sind Schätzungen zur Orientierung, keine medizinische Beratung. Achte immer zuerst auf die Müdigkeitszeichen. Wenn dich etwas beim Schlaf beunruhigt, frag deine Kinderärztin oder deinen Kinderarzt.</p></section>
+    <section class="section"><h2>Daten</h2>
+      <p class="muted small">${S.local ? `Gespeichert: ${S.sleeps.length} Einträge. Sie liegen nur auf diesem Gerät.` :`Gespeichert: ${S.sleeps.length} Einträge. Sie liegen bei dieser App und bleiben auf allen deinen Geräten gleich.`}</p>
+      <button class="plain danger" data-act="ask-reset">Alle Daten löschen</button></section>`;
+}
+
+/* ---------- Sheet ---------- */
+function openSheet(data) { S.sheet = data; renderSheet(); }
+function closeSheet() { S.sheet = null; renderSheet(); }
+function renderSheet() {
+  const x = S.sheet;
+  $sheet.hidden = !x;
+  if (!x) { $sheet.innerHTML = ''; return; }
+  if (x.mode === 'reset') {
+    $sheet.innerHTML = `<div class="panel" role="dialog" aria-modal="true" aria-label="Alle Daten löschen"><h2>Alle Daten löschen?</h2>
+      <p>Das entfernt ${S.sleeps.length} Einträge und alle Antworten endgültig.</p>
+      <div class="acts"><button class="plain" data-act="close">Abbrechen</button><button class="plain danger" data-act="reset">Endgültig löschen</button></div></div>`;
+    return;
+  }
+  const seg = (v, l) => `<button class="chip" aria-pressed="${x.type === v}" data-act="sh-type" data-v="${v}">${l}</button>`;
+  const st = (v, l) => `<button class="chip" aria-pressed="${x.settle === v}" data-act="sh-settle" data-v="${v}">${l}</button>`;
+  $sheet.innerHTML = `<div class="panel" role="dialog" aria-modal="true" aria-label="Schlaf bearbeiten">
+    <h2>${x.id ? 'Schlaf bearbeiten' : 'Schlaf nachtragen'}</h2>
+    <div class="chips">${seg('nap', 'Schläfchen')}${seg('night', 'Nacht')}</div>
+    <label>Tag<input class="field" id="sh-date" type="date" value="${x.date}" max="${isoDate(Date.now())}"></label>
+    <div class="two"><label>Eingeschlafen<input class="field" id="sh-start" type="time" value="${x.startT}"></label>
+    <label>Aufgewacht<input class="field" id="sh-end" type="time" value="${x.endT}"></label></div>
+    <div class="section"><span class="small muted">Einschlafen ging</span><div class="chips">${st('fast', 'Sofort')}${st('normal', 'Normal')}${st('slow', 'Lange')}</div></div>
+    ${x.err ? `<p class="err">${esc(x.err)}</p>` : ''}
+    <div class="acts"><button class="plain" data-act="close">Abbrechen</button><button class="main-btn" data-act="sh-save">Speichern</button></div>
+    ${x.id ? (x.confirm ? `<button class="plain danger" data-act="sh-del-yes">Wirklich löschen</button>` : `<button class="link danger" data-act="sh-del">Eintrag löschen</button>`) : ''}
+  </div>`;
+}
+function sheetFor(s) {
+  return { id: s.id, type: s.type, settle: s.settle || '', date: isoDate(s.start), startT: clock(s.start), endT: s.end ? clock(s.end) : '', err: '', confirm: false };
+}
+function keepSheetInputs() {
+  const x = S.sheet;
+  x.date = document.getElementById('sh-date').value;
+  x.startT = document.getElementById('sh-start').value;
+  x.endT = document.getElementById('sh-end').value;
+}
+function sheetSave() {
+  keepSheetInputs();
+  const x = S.sheet, now = Date.now();
+  if (!x.date || !x.startT) { x.err = 'Bitte trage Tag und Einschlafzeit ein.'; return renderSheet(); }
+  const start = new Date(x.date + 'T' + x.startT).getTime();
+  let end = x.endT ? new Date(x.date + 'T' + x.endT).getTime() : null;
+  if (end != null && end <= start) end += D; // past midnight
+  if (start > now || (end != null && end > now + M)) { x.err = 'Diese Zeit liegt in der Zukunft. Bitte prüfe die Uhrzeiten.'; return renderSheet(); }
+  if (end != null && end - start > 16 * H) { x.err = 'Das wären über 16 Stunden am Stück. Bitte prüfe die Uhrzeiten.'; return renderSheet(); }
+  const prev = x.id ? S.sleeps.find(s => s.id === x.id) : null;
+  if (end == null && !prev) { x.err = 'Bitte trage auch ein, wann der Schlaf endete.'; return renderSheet(); }
+  const s = { ...(prev || {}), id: x.id || uid(), type: x.type, start, end };
+  if (x.settle) s.settle = x.settle;
+  closeSheet(); saveSleep(s);
+  toast('Gespeichert. Die Vorhersage ist aktualisiert.');
+}
+
+/* ---------- Actions ---------- */
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+function toast(text, btns, ms) {
+  clearTimeout(toastTimer);
+  $toast.innerHTML = `<div class="toast"><span>${esc(text)}</span>${btns ? `<div class="chips">${btns.map(b => `<button data-act="${b[1]}" data-v="${b[2] == null ? '' : b[2]}">${esc(b[0])}</button>`).join('')}</div>` : ''}</div>`;
+  toastTimer = setTimeout(() => { $toast.innerHTML = ''; }, ms || 5000);
+}
+let last = null; // the sleep the toast buttons refer to
+function start() {
+  const now = Date.now(), p = plan(S.profile, S.sleeps, now);
+  const s = { id: uid(), start: now, end: null, type: typeFor(p, now) };
+  last = { id: s.id, base: now };
+  S.prompt = null; saveSleep(s);
+  toast(s.type === 'nap' ? 'Schläfchen läuft. Schon früher eingeschlafen?' : 'Nachtschlaf läuft. Schon früher eingeschlafen?',
+    [['vor 5 Min.', 'back', 5], ['vor 10 Min.', 'back', 10], ['vor 15 Min.', 'back', 15], ['Rückgängig', 'undo-start']], 9000);
+}
+function stop() {
+  const a = S.sleeps.find(s => !s.end);
+  if (!a) return;
+  const s = { ...a, end: Date.now() };
+  last = { id: s.id };
+  S.prompt = (s.end - s.start) > 5 * M ? s.id : null;
+  saveSleep(s);
+  toast('Eingetragen: ' + dur((s.end - s.start) / M) + ' Schlaf.', [['Schläft doch weiter', 'undo-stop']], 7000);
+}
+const handlers = {
+  'ob-opt': el => obAnswer(Number(el.dataset.v)),
+  'ob-next': obNext,
+  'ob-back': () => { S.ob.i--; S.ob.err = ''; render(); },
+  start, stop,
+  back: el => {
+    const s = S.sleeps.find(x => x.id === last.id);
+    if (s) { saveSleep({ ...s, start: last.base - Number(el.dataset.v) * M }); toast('Eingeschlafen um ' + clock(last.base - Number(el.dataset.v) * M) + ' Uhr.'); }
+  },
+  'undo-start': () => { removeSleep(last.id); $toast.innerHTML = ''; },
+  'undo-stop': () => {
+    const s = S.sleeps.find(x => x.id === last.id);
+    if (s) { S.prompt = null; saveSleep({ ...s, end: null }); $toast.innerHTML = ''; }
+  },
+  settle: el => {
+    const s = S.sleeps.find(x => x.id === S.prompt);
+    S.prompt = null;
+    if (s) saveSleep({ ...s, settle: el.dataset.v }); else render();
+  },
+  tab: el => { S.tab = el.dataset.v; render(); window.scrollTo(0, 0); },
+  edit: el => { const s = S.sleeps.find(x => x.id === el.dataset.id); if (s) openSheet(sheetFor(s)); },
+  add: () => { const now = Date.now(); openSheet({ id: null, type: 'nap', settle: '', date: isoDate(now), startT: clock(now - H), endT: clock(now), err: '', confirm: false }); },
+  'add-morning': () => {
+    const now = Date.now();
+    openSheet({ id: null, type: 'night', settle: '', date: isoDate(now - D), startT: minClock(S.profile.bed), endT: clock(Math.min(atMin(now, S.profile.wake), now)), err: '', confirm: false });
+  },
+  close: closeSheet,
+  'sh-type': el => { keepSheetInputs(); S.sheet.type = el.dataset.v; renderSheet(); },
+  'sh-settle': el => { keepSheetInputs(); S.sheet.settle = S.sheet.settle === el.dataset.v ? '' : el.dataset.v; renderSheet(); },
+  'sh-save': sheetSave,
+  'sh-del': () => { keepSheetInputs(); S.sheet.confirm = true; renderSheet(); },
+  'sh-del-yes': () => { const id = S.sheet.id; closeSheet(); removeSleep(id); toast('Eintrag gelöscht.'); },
+  redo: () => { startQuestions(S.profile); render(); },
+  'ask-reset': () => openSheet({ mode: 'reset' }),
+  reset: () => { closeSheet(); resetAll(); },
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (el && handlers[el.dataset.act]) handlers[el.dataset.act](el);
+  else if (e.target === $sheet) closeSheet();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && S.sheet) closeSheet();
+  if (e.key === 'Enter' && S.ob && e.target.matches('.field')) obNext();
+});
+
+/* ---------- Render ---------- */
+function render() {
+  if (S.boot) return;
+  if (S.ob) { renderQuestions(); document.querySelector('.q .field')?.focus(); return; }
+  if (!S.profile) { startQuestions(); return render(); }
+  const now = Date.now();
+  const view = S.tab === 'verlauf' ? renderHistory(now) : S.tab === 'mehr' ? renderSettings() : renderToday(now);
+  const tab = (v, l, i) => `<button data-act="tab" data-v="${v}" ${S.tab === v ? 'aria-current="page"' : ''}>${i}${l}</button>`;
+  $app.innerHTML = view + `<nav class="tabs" aria-label="Bereiche">${tab('heute', 'Heute', ICON.moon())}${tab('verlauf', 'Verlauf', ICON.chart())}${tab('mehr', 'Einstellungen', ICON.gear())}</nav>`;
+}
+setInterval(() => {
+  const t = document.querySelector('[data-timer]');
+  if (t) t.textContent = timer(Date.now() - Number(t.dataset.timer));
+}, 1000);
+setInterval(() => { if (!S.ob && !S.boot && S.tab === 'heute') render(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !S.ob) render(); });
+boot();
+</script>
